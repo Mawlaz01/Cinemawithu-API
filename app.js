@@ -12,7 +12,7 @@ var registerRouter = require('./routes/auth/register')
 var loginRouter = require('./routes/auth/login')
 var filmRouter = require('./routes/admin/film')
 var seatRouter = require('./routes/admin/seat')
-//var showtimeRouter = require('./routes/admin/showtime')
+var showtimeRouter = require('./routes/admin/showtime')
 var theaterRouter = require('./routes/admin/theater')
 
 var app = express()
@@ -47,7 +47,7 @@ app.use('/API', registerRouter)
 app.use('/API', loginRouter)
 app.use('/API', filmRouter)
 app.use('/API', seatRouter)
-//app.use('/API', showtimeRouter)
+app.use('/API', showtimeRouter)
 app.use('/API', theaterRouter)
 
 // catch 404 and forward to error handler
