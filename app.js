@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
+const cors = require('cors')
+const { onlyDomain } = require('./config/middleware/corsOptions')
 
 var indexRouter = require('./routes/index');
 var registerRouter = require('./routes/auth/register')
@@ -16,6 +18,7 @@ var app = express();
 var dotenv = require('dotenv')
 dotenv.config()
 const port = process.env.PORT
+app.use(cors())
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
