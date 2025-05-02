@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var verifyToken = require('../config/middleware/jwt.js');
-
+const theater = require('../../model/theaterModel')
 
 
 module.exports = router;
