@@ -3,6 +3,7 @@ var router = express.Router()
 const admin = require('../../model/adminModel')
 const user = require('../../model/userModel')
 const jwt = require('jsonwebtoken')
+const { verifyToken } = require('../../config/middleware/jwt')
 
 router.post('/login', async (req, res, next) => {
     let { email, password } = req.body
@@ -47,5 +48,33 @@ router.post('/login', async (req, res, next) => {
         res.status(500).json({ message: error.message })
     }
 })
+
+router.get('/profile', verifyToken, async (req, res) => {
+    try {
+        let userData = null;
+        
+        if (req.user.type === 'admin') {
+            userData = await admin.getAdminById(req.user.id);
+        } else {
+            userData = await user.getUserById(req.user.id);
+        }
+
+        if (!userData) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({
+            message: 'OK',
+            data: {
+                id: userData.admin_id || userData.user_id,
+                username: userData.name,
+                email: userData.email,
+                type: req.user.type
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 module.exports = router;

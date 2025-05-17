@@ -8,8 +8,13 @@ const cors = require('cors')
 const { onlyDomain } = require('./config/middleware/corsOptions')
 
 var indexRouter = require('./routes/index')
+
+// var auth
 var registerRouter = require('./routes/auth/register')
 var loginRouter = require('./routes/auth/login')
+var logoutRouter = require('./routes/auth/logout')
+
+// var admin
 var filmRouter = require('./routes/admin/film')
 var seatRouter = require('./routes/admin/seat')
 var showtimeRouter = require('./routes/admin/showtime')
@@ -43,8 +48,13 @@ app.use(session({
 }))
 
 app.use('/API', indexRouter)
+
+// app auth 
 app.use('/API', registerRouter)
 app.use('/API', loginRouter)
+app.use('/API', logoutRouter)
+
+// app admin
 app.use('/API', filmRouter)
 app.use('/API', seatRouter)
 app.use('/API', showtimeRouter)
