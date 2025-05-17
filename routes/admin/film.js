@@ -4,7 +4,7 @@ const filmModel = require('../../model/filmModel')
 const upload = require('../../config/middleware/uploudPhoto')
 const { verifyToken, authorize } = require('../../config/middleware/jwt')
 
-router.get('/film', verifyToken, authorize(['admin']), async (req, res) => {
+router.get('/film', verifyToken, authorize(['admin']),async (req, res) => {
   try {
     const films = await filmModel.getAll()
     res.status(200).json({

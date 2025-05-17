@@ -49,6 +49,7 @@ app.use('/API', filmRouter)
 app.use('/API', seatRouter)
 app.use('/API', showtimeRouter)
 app.use('/API', theaterRouter)
+app.use('/images', express.static('public/images'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
