@@ -34,23 +34,6 @@ class seatModel {
         })
     }
 
-    static async getByTheaterId(theaterId) {
-        return new Promise((resolve, reject) => {
-            connection.query(`
-                SELECT s.*, t.name AS theater_name 
-                FROM seats s
-                JOIN theaters t ON s.theater_id = t.theater_id
-                WHERE s.theater_id = ?
-            `, [theaterId], (err, results) => {
-                if (err) {
-                    reject(err)
-                } else {
-                    resolve(results)
-                }
-            })
-        })
-    }
-
     static async create(data) {
         return new Promise((resolve, reject) => {
             const { theater_id, seat_label } = data

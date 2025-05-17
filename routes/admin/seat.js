@@ -42,33 +42,6 @@ router.get('/seat/:id', verifyToken, authorize(['admin']), async (req, res) => {
   }
 });
 
-// Get seats by theater ID
-router.get('/seat/theater/:theaterId', verifyToken, authorize(['admin']), async (req, res) => {
-  try {
-    const theaterId = req.params.theaterId;
-    
-    // Verify theater exists
-    const theaterData = await theater.getById(theaterId);
-    if (!theaterData) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Theater tidak ditemukan'
-      });
-    }
-    
-    const seats = await seat.getByTheaterId(theaterId);
-    res.status(200).json({
-      status: 'success',
-      data: seats
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
-  }
-});
-
 // Create new seat
 router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) => {
   try {

@@ -26,7 +26,7 @@ class UserModel {
         })
     }
 
-    static async getUsername(userId) {
+    static async getUserById(userId) {
         return new Promise((resolve, reject) => {
         connection.query('SELECT name FROM users WHERE user_id = ?', [userId], (err, rows) => { 
             if (err) {
