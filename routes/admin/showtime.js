@@ -43,59 +43,7 @@ router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) 
   }
 });
 
-// Get showtimes by film ID
-router.get('/showtime/film/:filmId', verifyToken, authorize(['admin']), async (req, res) => {
-  try {
-    const filmId = req.params.filmId;
-    
-    // Verify film exists
-    const filmData = await film.getById(filmId);
-    if (!filmData) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Film tidak ditemukan'
-      });
-    }
-    
-    const showtimes = await showtime.getByFilmId(filmId);
-    res.status(200).json({
-      status: 'success',
-      data: showtimes
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
-  }
-});
 
-// Get showtimes by theater ID
-router.get('/showtime/theater/:theaterId', verifyToken, authorize(['admin']), async (req, res) => {
-  try {
-    const theaterId = req.params.theaterId;
-    
-    // Verify theater exists
-    const theaterData = await theater.getById(theaterId);
-    if (!theaterData) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Theater tidak ditemukan'
-      });
-    }
-    
-    const showtimes = await showtime.getByTheaterId(theaterId);
-    res.status(200).json({
-      status: 'success',
-      data: showtimes
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
-  }
-});
 
 // Create new showtime
 router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, res) => {
