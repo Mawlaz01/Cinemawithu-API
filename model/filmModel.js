@@ -73,6 +73,30 @@ class filmModel {
             })
         })
     }
+
+    static async getNowShowing() {
+        return new Promise((resolve, reject) => {
+            connection.query('SELECT * FROM films WHERE status = ?', ['now_showing'], (err, results) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(results)
+                }
+            })
+        })
+    }
+
+    static async getUpcoming() {
+        return new Promise((resolve, reject) => {
+            connection.query('SELECT * FROM films WHERE status = ?', ['upcoming'], (err, results) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(results)
+                }
+            })
+        })
+    }
 }
 
 module.exports = filmModel

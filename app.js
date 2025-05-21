@@ -20,6 +20,9 @@ var seatRouter = require('./routes/admin/seat')
 var showtimeRouter = require('./routes/admin/showtime')
 var theaterRouter = require('./routes/admin/theater')
 
+// var user
+var dashboardRouter = require('./routes/user/dashboard')
+
 var app = express()
 
 var dotenv = require('dotenv')
@@ -60,6 +63,9 @@ app.use('/API', seatRouter)
 app.use('/API', showtimeRouter)
 app.use('/API', theaterRouter)
 app.use('/images', express.static('public/images'));
+
+// app user
+app.use('/API', dashboardRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
