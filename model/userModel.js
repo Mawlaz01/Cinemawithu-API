@@ -28,13 +28,13 @@ class UserModel {
 
     static async getUserById(userId) {
         return new Promise((resolve, reject) => {
-        connection.query('SELECT name FROM users WHERE user_id = ?', [userId], (err, rows) => { 
-            if (err) {
-            reject(err)
-            } else {
-            resolve(rows[0] ? rows[0].name : null)
-            }
-        })
+            connection.query('SELECT name, email FROM users WHERE user_id = ?', [userId], (err, rows) => { 
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(rows[0] || null)
+                }
+            })
         })
     }
 }
