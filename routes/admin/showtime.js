@@ -48,10 +48,10 @@ router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) 
 // Create new showtime
 router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, res) => {
   try {
-    if (!req.body.film_id || !req.body.theater_id || !req.body.start_time || !req.body.price) {
+    if (!req.body.film_id || !req.body.theater_id || !req.body.date || !req.body.time || !req.body.price) {
       return res.status(400).json({
         status: 'error',
-        message: 'Film ID, Theater ID, waktu mulai, dan harga wajib diisi'
+        message: 'Film ID, Theater ID, tanggal, waktu, dan harga wajib diisi'
       });
     }
 
@@ -83,18 +83,28 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
     }
 
     // Validate date format
-    const startTime = new Date(req.body.start_time);
-    if (isNaN(startTime.getTime())) {
+    const date = new Date(req.body.date);
+    if (isNaN(date.getTime())) {
       return res.status(400).json({
         status: 'error',
-        message: 'Format waktu tidak valid'
+        message: 'Format tanggal tidak valid'
+      });
+    }
+
+    // Validate time format
+    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(req.body.time)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Format waktu tidak valid (HH:mm)'
       });
     }
 
     const showtimeData = {
       film_id: req.body.film_id,
       theater_id: req.body.theater_id,
-      start_time: startTime,
+      date: req.body.date,
+      time: req.body.time,
       price: price
     };
 
@@ -160,21 +170,36 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
     }
 
     // Validate date format if provided
-    let startTime = existingShowtime.start_time;
-    if (req.body.start_time) {
-      startTime = new Date(req.body.start_time);
-      if (isNaN(startTime.getTime())) {
+    let date = existingShowtime.date;
+    if (req.body.date) {
+      const newDate = new Date(req.body.date);
+      if (isNaN(newDate.getTime())) {
         return res.status(400).json({
           status: 'error',
-          message: 'Format waktu tidak valid'
+          message: 'Format tanggal tidak valid'
         });
       }
+      date = req.body.date;
+    }
+
+    // Validate time format if provided
+    let time = existingShowtime.time;
+    if (req.body.time) {
+      const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      if (!timeRegex.test(req.body.time)) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Format waktu tidak valid (HH:mm)'
+        });
+      }
+      time = req.body.time;
     }
 
     const showtimeData = {
       film_id: req.body.film_id || existingShowtime.film_id,
       theater_id: req.body.theater_id || existingShowtime.theater_id,
-      start_time: startTime,
+      date: date,
+      time: time,
       price: price
     };
 
