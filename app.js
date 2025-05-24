@@ -22,6 +22,7 @@ var theaterRouter = require('./routes/admin/theater')
 
 // var user
 var dashboardRouter = require('./routes/user/dashboard')
+var detailfilmRouter = require('./routes/user/detailfilm')
 
 var app = express()
 
@@ -66,6 +67,7 @@ app.use('/images', express.static('public/images'));
 
 // app user
 app.use('/API', dashboardRouter)
+app.use('/API', detailfilmRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
