@@ -81,6 +81,45 @@ class seatModel {
             })
         })
     }
+
+    static async getSeatsByFilmId(filmId) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT DISTINCT s.* 
+                FROM seats s
+                INNER JOIN theaters t ON s.theater_id = t.theater_id
+                INNER JOIN showtimes st ON st.theater_id = t.theater_id
+                WHERE st.film_id = ?
+            `
+            connection.query(query, [filmId], (err, results) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(results)
+                }
+            })
+        })
+    }
+
+    static async getBookedSeatsByFilmId(filmId) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT DISTINCT s.seat_id, s.seat_label
+                FROM seats s
+                INNER JOIN booking_seats bs ON s.seat_id = bs.seat_id
+                INNER JOIN bookings b ON bs.booking_id = b.booking_id
+                INNER JOIN showtimes st ON b.showtime_id = st.showtime_id
+                WHERE st.film_id = ? AND b.status = 'paid'
+            `
+            connection.query(query, [filmId], (err, results) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(results)
+                }
+            })
+        })
+    }
 }
 
 module.exports = seatModel;
