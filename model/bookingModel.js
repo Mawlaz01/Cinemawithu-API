@@ -232,6 +232,51 @@ class bookingModel {
             );
         });
     }
+
+    static async getDetailedBookingInfo(filmId, showtimeId, bookingId) {
+        return new Promise((resolve, reject) => {
+            connection.query(`
+                SELECT 
+                    f.poster,
+                    f.title as film_title,
+                    t.name as theater_name,
+                    s.date,
+                    s.time,
+                    b.quantity,
+                    b.total_amount,
+                    GROUP_CONCAT(st.seat_label) as seat_labels
+                FROM bookings b
+                JOIN showtimes s ON b.showtime_id = s.showtime_id
+                JOIN films f ON s.film_id = f.film_id
+                JOIN theaters t ON s.theater_id = t.theater_id
+                JOIN booking_seats bs ON b.booking_id = bs.booking_id
+                JOIN seats st ON bs.seat_id = st.seat_id
+                WHERE f.film_id = ? 
+                AND s.showtime_id = ? 
+                AND b.booking_id = ?
+                GROUP BY b.booking_id
+            `, [filmId, showtimeId, bookingId], (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        // Format the date
+                        const booking = results[0];
+                        if (booking.date) {
+                            const date = new Date(booking.date);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            booking.date = `${day}/${month}/${year}`;
+                        }
+                        resolve(booking);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
 }
 
 module.exports = bookingModel 

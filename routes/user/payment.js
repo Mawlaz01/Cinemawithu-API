@@ -5,7 +5,7 @@ const { verifyToken, authorize } = require('../../config/middleware/jwt');
 const bookingModel = require('../../model/bookingModel');
 const UserModel = require('../../model/userModel');
 
-router.post("/pembayaran/:filmId/:showtimeId/:bookingId/pay", verifyToken, authorize(["user"]), async (req, res) => {
+router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["user"]), async (req, res) => {
   try {
     const { filmId, showtimeId, bookingId } = req.params;
     const user_id = req.user.id;
@@ -32,7 +32,7 @@ router.post("/pembayaran/:filmId/:showtimeId/:bookingId/pay", verifyToken, autho
 
     const parameter = {
       transaction_details: {
-        order_id: `ORDER-${Date.now()}`,
+        order_id: `CNM-${Date.now()}`,
         gross_amount: booking.total_amount,
       },
       customer_details: {
@@ -83,7 +83,7 @@ router.post("/pembayaran/:filmId/:showtimeId/:bookingId/pay", verifyToken, autho
   }
 });
 
-router.get("/pembayaran/status/:orderId", verifyToken, authorize(["user"]), async (req, res) => {
+router.get("/payment/status/:orderId", verifyToken, authorize(["user"]), async (req, res) => {
   const snap = new midtransClient.Snap({
     isProduction: false,
     clientKey: process.env.MIDTRANS_CLIENT_KEY,
