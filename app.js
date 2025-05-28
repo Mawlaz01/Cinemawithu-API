@@ -23,6 +23,7 @@ var theaterRouter = require('./routes/admin/theater')
 // var user
 var dashboardRouter = require('./routes/user/dashboard')
 var bookingRouter = require('./routes/user/booking')
+var paymentRouter = require('./routes/user/payment')
 
 var app = express()
 
@@ -68,6 +69,7 @@ app.use('/images', express.static('public/images'));
 // app user
 app.use('/API', dashboardRouter)
 app.use('/API', bookingRouter)
+app.use('/API', paymentRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

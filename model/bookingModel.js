@@ -146,6 +146,92 @@ class bookingModel {
             })
         })
     }
+
+    static async createPayment(data) {
+        return new Promise((resolve, reject) => {
+            const { booking_id, gateway_txn_id, amount, method, status, paid_at } = data;
+            
+            // Update booking status to pending
+            connection.query(
+                'UPDATE bookings SET status = ? WHERE booking_id = ?',
+                ['pending', booking_id],
+                (err) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    
+                    // Insert payment record
+                    connection.query(
+                        'INSERT INTO payments (booking_id, gateway_txn_id, amount, method, status, paid_at) VALUES (?, ?, ?, ?, ?, ?)',
+                        [booking_id, gateway_txn_id, amount, method, status, paid_at],
+                        (err, results) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(results.insertId);
+                            }
+                        }
+                    );
+                }
+            );
+        });
+    }
+
+    static async updatePaymentStatus(gateway_txn_id, status, method) {
+        return new Promise((resolve, reject) => {
+            connection.query(
+                'UPDATE payments SET status = ?, method = ?, paid_at = CASE WHEN ? = "settlement" THEN CURRENT_TIMESTAMP ELSE paid_at END WHERE gateway_txn_id = ?',
+                [status, method, status, gateway_txn_id],
+                (err, results) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+
+                    // Update booking status based on payment status
+                    let bookingStatus;
+                    if (status === 'settlement') {
+                        bookingStatus = 'paid';
+                    } else if (status === 'cancelled' || status === 'expired') {
+                        bookingStatus = 'cancelled';
+                    }
+
+                    if (bookingStatus) {
+                        connection.query(
+                            'UPDATE bookings b JOIN payments p ON b.booking_id = p.booking_id SET b.status = ? WHERE p.gateway_txn_id = ?',
+                            [bookingStatus, gateway_txn_id],
+                            (err) => {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve(results.affectedRows);
+                                }
+                            }
+                        );
+                    } else {
+                        resolve(results.affectedRows);
+                    }
+                }
+            );
+        });
+    }
+
+    static async getPaymentByBookingId(booking_id) {
+        return new Promise((resolve, reject) => {
+            connection.query(
+                'SELECT * FROM payments WHERE booking_id = ?',
+                [booking_id],
+                (err, results) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(results[0] || null);
+                    }
+                }
+            );
+        });
+    }
 }
 
 module.exports = bookingModel 
