@@ -270,4 +270,47 @@ router.post('/booking/history/:showtimeId', verifyToken, authorize(['user']), as
     }
 })
 
+router.get('/booking/:filmId/:showtimeId/:bookingId/status', verifyToken, authorize(['user']), async (req, res) => {
+    try {
+        const { filmId, showtimeId, bookingId } = req.params;
+        const user_id = req.user.id;
+
+        // Get booking details
+        const bookingDetails = await bookingModel.getDetailedBookingInfo(filmId, showtimeId, bookingId);
+        
+        if (!bookingDetails) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Booking tidak ditemukan'
+            });
+        }
+
+        res.json({
+            status: 'success',
+            data: {
+                film: {
+                    poster: bookingDetails.poster,
+                    title: bookingDetails.film_title
+                },
+                showtime: {
+                    theater: bookingDetails.theater_name,
+                    date: bookingDetails.date,
+                    time: bookingDetails.time
+                },
+                booking: {
+                    quantity: bookingDetails.quantity,
+                    seats: bookingDetails.seat_labels.split(','),
+                    total_amount: bookingDetails.total_amount
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error in get booking status route:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Terjadi kesalahan pada server'
+        });
+    }
+});
+
 module.exports = router
