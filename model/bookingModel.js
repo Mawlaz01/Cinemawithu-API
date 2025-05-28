@@ -277,6 +277,132 @@ class bookingModel {
             });
         });
     }
+
+    static async getDetailedBookingHistoryByUserId(user_id) {
+        return new Promise((resolve, reject) => {
+            connection.query(`
+                SELECT 
+                    b.booking_id,
+                    s.showtime_id,
+                    f.title as film_title,
+                    t.name as theater_name,
+                    b.quantity,
+                    b.status as payment_status,
+                    b.total_amount,
+                    b.booked_at,
+                    f.poster,
+                    s.date,
+                    s.time,
+                    s.price as price_per_ticket,
+                    MAX(p.method) as payment_method,
+                    GROUP_CONCAT(st.seat_label) as seat_labels
+                FROM booking_history bh
+                JOIN bookings b ON bh.booking_id = b.booking_id
+                JOIN showtimes s ON bh.showtime_id = s.showtime_id
+                JOIN films f ON s.film_id = f.film_id
+                JOIN theaters t ON s.theater_id = t.theater_id
+                LEFT JOIN payments p ON b.booking_id = p.booking_id
+                LEFT JOIN booking_seats bs ON b.booking_id = bs.booking_id
+                LEFT JOIN seats st ON bs.seat_id = st.seat_id
+                WHERE bh.user_id = ?
+                GROUP BY b.booking_id, s.showtime_id
+                ORDER BY b.booked_at DESC
+            `, [user_id], (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+    }
+
+    static async getDetailedBookingHistoryByShowtimeId(showtimeId) {
+        return new Promise((resolve, reject) => {
+            connection.query(`
+                SELECT 
+                    b.status as booking_status,
+                    MAX(p.gateway_txn_id) as gateway_txn_id,
+                    b.booked_at,
+                    f.poster,
+                    f.title as film_title,
+                    s.date,
+                    s.time,
+                    t.name as theater_name,
+                    b.quantity,
+                    s.price as price_per_ticket,
+                    b.total_amount,
+                    MAX(p.method) as payment_method,
+                    GROUP_CONCAT(st.seat_label) as seat_labels
+                FROM bookings b
+                LEFT JOIN payments p ON b.booking_id = p.booking_id
+                JOIN showtimes s ON b.showtime_id = s.showtime_id
+                JOIN films f ON s.film_id = f.film_id
+                JOIN theaters t ON s.theater_id = t.theater_id
+                JOIN booking_seats bs ON b.booking_id = bs.booking_id
+                JOIN seats st ON bs.seat_id = st.seat_id
+                WHERE b.showtime_id = ?
+                GROUP BY b.booking_id
+                ORDER BY b.booked_at DESC
+            `, [showtimeId], (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+    }
+
+    static async getDetailedBookingHistoryByBookingId(booking_id) {
+        return new Promise((resolve, reject) => {
+            connection.query(`
+                SELECT 
+                    b.booking_id,
+                    b.status as booking_status,
+                    MAX(p.gateway_txn_id) as gateway_txn_id,
+                    b.booked_at,
+                    f.poster,
+                    f.title as film_title,
+                    s.date,
+                    s.time,
+                    t.name as theater_name,
+                    b.quantity,
+                    s.price as price_per_ticket,
+                    b.total_amount,
+                    MAX(p.method) as payment_method,
+                    GROUP_CONCAT(st.seat_label) as seat_labels
+                FROM bookings b
+                LEFT JOIN payments p ON b.booking_id = p.booking_id
+                JOIN showtimes s ON b.showtime_id = s.showtime_id
+                JOIN films f ON s.film_id = f.film_id
+                JOIN theaters t ON s.theater_id = t.theater_id
+                LEFT JOIN booking_seats bs ON b.booking_id = bs.booking_id
+                LEFT JOIN seats st ON bs.seat_id = st.seat_id
+                WHERE b.booking_id = ?
+                GROUP BY b.booking_id
+            `, [booking_id], (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        // Format the date
+                        const booking = results[0];
+                        if (booking.date) {
+                            const date = new Date(booking.date);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            booking.date = `${day}/${month}/${year}`;
+                        }
+                        resolve(booking);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
 }
 
 module.exports = bookingModel 
