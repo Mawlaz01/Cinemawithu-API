@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const filmModel = require('../../model/filmModel')
 const userModel = require('../../model/userModel')
+const bookingModel = require('../../model/bookingModel')
 const { verifyToken, authorize } = require('../../config/middleware/jwt')
 
 router.get('/dashboard/showing', verifyToken, authorize(['user']), async (req, res) => {
@@ -57,5 +58,46 @@ router.get('/dashboard/profile', verifyToken, authorize(['user']), async (req, r
         })
     }
 })
+
+router.get('/dashboard/history', verifyToken, authorize(['user']), async (req, res) => {
+    try {
+        const userId = req.user.id
+        const bookingHistory = await bookingModel.getDetailedBookingHistoryByUserId(userId)
+        
+        res.json({
+            status: 'success',
+            data: bookingHistory
+        })
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        })
+    }
+})
+
+router.get('/dashboard/history/:bookingId', verifyToken, authorize(['user']), async (req, res) => {
+    try {
+        const bookingId = req.params.bookingId;
+        const details = await bookingModel.getDetailedBookingHistoryByBookingId(bookingId);
+        
+        if (!details) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Booking not found'
+            });
+        }
+        
+        res.json({
+            status: 'success',
+            data: [details] // Wrap in array to maintain consistency
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+});
 
 module.exports = router

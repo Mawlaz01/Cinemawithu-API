@@ -40,7 +40,7 @@ router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["
         email: user.email,
       },
       callbacks: {
-        finish: `http://localhost:3000`,
+        finish: `http://192.168.1.21:3000`,
       },
       enabled_payments: [
         "bca_va",
