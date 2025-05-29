@@ -40,7 +40,7 @@ router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["
         email: user.email,
       },
       callbacks: {
-        finish: `http://192.168.1.21:3000`,
+        finish: `http://192.168.1.18:3000/dashboard/history/${bookingId}`,
       },
       enabled_payments: [
         "bca_va",
@@ -83,7 +83,7 @@ router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["
   }
 });
 
-router.get("/payment/status/:orderId", verifyToken, authorize(["user"]), async (req, res) => {
+router.get("/payment/status/:gatewayTxnId", verifyToken, authorize(["user"]), async (req, res) => {
   const snap = new midtransClient.Snap({
     isProduction: false,
     clientKey: process.env.MIDTRANS_CLIENT_KEY,
@@ -91,7 +91,7 @@ router.get("/payment/status/:orderId", verifyToken, authorize(["user"]), async (
   });
 
   try {
-    const result = await snap.transaction.status(req.params.orderId);
+    const result = await snap.transaction.status(req.params.gatewayTxnId);
     
     let paymentMethod = 'UNSPECIFIED';
     if (result.payment_type === 'bank_transfer') {
@@ -111,7 +111,7 @@ router.get("/payment/status/:orderId", verifyToken, authorize(["user"]), async (
 
     // Update payment record
     await bookingModel.updatePaymentStatus(
-      result.order_id,
+      req.params.gatewayTxnId,
       paymentStatus,
       paymentMethod
     );

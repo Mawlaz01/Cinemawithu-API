@@ -300,7 +300,8 @@ router.get('/booking/:filmId/:showtimeId/:bookingId/status', verifyToken, author
                 booking: {
                     quantity: bookingDetails.quantity,
                     seats: bookingDetails.seat_labels.split(','),
-                    total_amount: bookingDetails.total_amount
+                    total_amount: bookingDetails.total_amount,
+                    status: bookingDetails.booking_status
                 }
             }
         });
