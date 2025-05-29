@@ -244,6 +244,7 @@ class bookingModel {
                     s.time,
                     b.quantity,
                     b.total_amount,
+                    b.status as booking_status,
                     GROUP_CONCAT(st.seat_label) as seat_labels
                 FROM bookings b
                 JOIN showtimes s ON b.showtime_id = s.showtime_id
