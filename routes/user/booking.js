@@ -115,7 +115,7 @@ router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, author
         const seats = await seatModel.getSeatsByFilmId(filmId)
         
         // Get booked seats for the film
-        const bookedSeats = await seatModel.getBookedSeatsByFilmId(filmId)
+        const bookedSeats = await seatModel.getBookedSeatsByFilmId(filmId, showtimeId)
         
         // Create a map of booked seats for easy lookup
         const bookedSeatsMap = new Map(bookedSeats.map(seat => [seat.seat_id, true]))
