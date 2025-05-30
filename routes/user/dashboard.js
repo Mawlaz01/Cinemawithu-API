@@ -90,7 +90,7 @@ router.get('/dashboard/history/:bookingId', verifyToken, authorize(['user']), as
         
         res.json({
             status: 'success',
-            data: [details] // Wrap in array to maintain consistency
+            data: [details]
         });
     } catch (error) {
         res.status(500).json({

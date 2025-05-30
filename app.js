@@ -7,6 +7,9 @@ var session = require('express-session')
 const cors = require('cors')
 const { onlyDomain } = require('./config/middleware/corsOptions')
 
+// Import cron job
+require('./config/middleware/cron')
+
 var indexRouter = require('./routes/index')
 
 // var auth

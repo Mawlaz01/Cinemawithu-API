@@ -372,6 +372,7 @@ class bookingModel {
                     s.price as price_per_ticket,
                     b.total_amount,
                     MAX(p.method) as payment_method,
+                    MAX(p.status) as payment_status,
                     GROUP_CONCAT(st.seat_label) as seat_labels
                 FROM bookings b
                 LEFT JOIN payments p ON b.booking_id = p.booking_id
@@ -396,11 +397,51 @@ class bookingModel {
                             const day = String(date.getDate()).padStart(2, '0');
                             booking.date = `${day}/${month}/${year}`;
                         }
+                        // Set default payment status if null
+                        if (!booking.payment_status) {
+                            booking.payment_status = 'pending';
+                        }
                         resolve(booking);
                     } else {
                         resolve(null);
                     }
                 }
+            });
+        });
+    }
+
+    static async checkAndUpdateExpiredBookings() {
+        return new Promise((resolve, reject) => {
+            // Get all pending bookings that are older than 10 minutes
+            connection.query(`
+                SELECT b.booking_id, p.gateway_txn_id
+                FROM bookings b
+                LEFT JOIN payments p ON b.booking_id = p.booking_id
+                WHERE b.status = 'pending' 
+                AND p.status = 'pending'
+                AND b.booked_at < DATE_SUB(NOW(), INTERVAL 10 MINUTE)
+            `, async (err, results) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                // Update each expired booking
+                for (const booking of results) {
+                    try {
+                        // Update booking status to cancelled
+                        await this.updateBookingStatus(booking.booking_id, 'cancelled');
+                        
+                        // Update payment status to expired
+                        if (booking.gateway_txn_id) {
+                            await this.updatePaymentStatus(booking.gateway_txn_id, 'expired', 'UNSPECIFIED');
+                        }
+                    } catch (error) {
+                        console.error(`Error updating expired booking ${booking.booking_id}:`, error);
+                    }
+                }
+
+                resolve(results.length);
             });
         });
     }
