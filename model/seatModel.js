@@ -101,17 +101,17 @@ class seatModel {
         })
     }
 
-    static async getBookedSeatsByFilmId(filmId) {
+    static async getBookedSeatsByFilmId(filmId, showtimeId) {
         return new Promise((resolve, reject) => {
             const query = `
-                SELECT DISTINCT s.seat_id, s.seat_label
+                SELECT DISTINCT s.seat_id, s.seat_label, b.status as booking_status
                 FROM seats s
                 INNER JOIN booking_seats bs ON s.seat_id = bs.seat_id
                 INNER JOIN bookings b ON bs.booking_id = b.booking_id
                 INNER JOIN showtimes st ON b.showtime_id = st.showtime_id
-                WHERE st.film_id = ? AND b.status = 'paid'
+                WHERE st.film_id = ? AND b.showtime_id = ? AND (b.status = 'paid' OR b.status = 'pending')
             `
-            connection.query(query, [filmId], (err, results) => {
+            connection.query(query, [filmId, showtimeId], (err, results) => {
                 if (err) {
                     reject(err)
                 } else {

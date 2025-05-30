@@ -39,9 +39,6 @@ router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["
         name: user.name,
         email: user.email,
       },
-      callbacks: {
-        finish: `http://192.168.1.18:3000/dashboard/history/${bookingId}`,
-      },
       enabled_payments: [
         "bca_va",
         "bni_va",
