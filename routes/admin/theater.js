@@ -2,11 +2,22 @@ var express = require('express');
 var router = express.Router();
 const theater = require('../../model/theaterModel');
 const { verifyToken, authorize } = require('../../config/middleware/jwt');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 60 });
 
 // Get all theaters
 router.get('/theater', verifyToken, authorize(['admin']), async (req, res) => {
+  const cacheKey = 'allTheaters';
+  const cachedTheaters = cache.get(cacheKey);
+  if (cachedTheaters) {
+    return res.status(200).json({
+      status: 'success',
+      data: cachedTheaters
+    });
+  }
   try {
     const theaters = await theater.getAll();
+    cache.set(cacheKey, theaters);
     res.status(200).json({
       status: 'success',
       data: theaters
@@ -21,6 +32,14 @@ router.get('/theater', verifyToken, authorize(['admin']), async (req, res) => {
 
 // Get theater by ID
 router.get('/theater/:id', verifyToken, authorize(['admin']), async (req, res) => {
+  const cacheKey = `theater-${req.params.id}`;
+  const theaterData = cache.get(cacheKey);
+  if (theaterData) {
+    return res.status(200).json({
+      status: 'success',
+      data: theaterData
+    });
+  }
   try {
     const theaterData = await theater.getById(req.params.id);
     if (!theaterData) {

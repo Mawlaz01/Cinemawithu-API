@@ -4,11 +4,22 @@ const showtime = require('../../model/showtimeModel');
 const film = require('../../model/filmModel');
 const theater = require('../../model/theaterModel');
 const { verifyToken, authorize } = require('../../config/middleware/jwt');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 60 });
 
 // Get all showtimes
 router.get('/showtime', verifyToken, authorize(['admin']), async (req, res) => {
+  const cacheKey = 'allShowtimes';
+  const cachedShowtimes = cache.get(cacheKey);
+  if (cachedShowtimes) {
+    return res.status(200).json({
+      status: 'success',
+      data: cachedShowtimes
+    });
+  }
   try {
     const showtimes = await showtime.getAll();
+    cache.set(cacheKey, showtimes);
     res.status(200).json({
       status: 'success',
       data: showtimes
@@ -23,6 +34,14 @@ router.get('/showtime', verifyToken, authorize(['admin']), async (req, res) => {
 
 // Get showtime by ID
 router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) => {
+  const cacheKey = `showtime-${req.params.id}`;
+  const cachedShowtime = cache.get(cacheKey);
+  if (cachedShowtime) {
+    return res.status(200).json({
+      status: 'success',
+      data: cachedShowtime
+    });
+  }
   try {
     const showtimeData = await showtime.getById(req.params.id);
     if (!showtimeData) {
@@ -31,6 +50,7 @@ router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) 
         message: 'Jadwal tayang tidak ditemukan'
       });
     }
+    cache.set(cacheKey, showtimeData);
     res.status(200).json({
       status: 'success',
       data: showtimeData
@@ -42,8 +62,6 @@ router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) 
     });
   }
 });
-
-
 
 // Create new showtime
 router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, res) => {

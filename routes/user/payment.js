@@ -4,6 +4,8 @@ const midtransClient = require('midtrans-client');
 const { verifyToken, authorize } = require('../../config/middleware/jwt');
 const bookingModel = require('../../model/bookingModel');
 const UserModel = require('../../model/userModel');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 60 });
 
 router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["user"]), async (req, res) => {
   try {
@@ -81,6 +83,15 @@ router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["
 });
 
 router.get("/payment/status/:gatewayTxnId", verifyToken, authorize(["user"]), async (req, res) => {
+  const cacheKey = `paymentStatus-${req.params.gatewayTxnId}`;
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return res.status(200).json({
+      status: 'success',
+      message: 'Payment status from cache',
+      data: cachedData
+    });
+  }
   const snap = new midtransClient.Snap({
     isProduction: false,
     clientKey: process.env.MIDTRANS_CLIENT_KEY,
@@ -113,6 +124,7 @@ router.get("/payment/status/:gatewayTxnId", verifyToken, authorize(["user"]), as
       paymentMethod
     );
 
+    cache.set(cacheKey, result);
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -3,11 +3,22 @@ var router = express.Router();
 const seat = require('../../model/seatModel');
 const theater = require('../../model/theaterModel');
 const { verifyToken, authorize } = require('../../config/middleware/jwt');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 60 });
 
 // Get all seats
 router.get('/seat', verifyToken, authorize(['admin']), async (req, res) => {
+  const cacheKey = 'allSeats';
+  const cachedSeats = cache.get(cacheKey);
+  if (cachedSeats) {
+    return res.status(200).json({
+      status: 'success',
+      data: cachedSeats
+    });
+  }
   try {
     const seats = await seat.getAll();
+    cache.set(cacheKey, seats);
     res.status(200).json({
       status: 'success',
       data: seats
@@ -22,6 +33,14 @@ router.get('/seat', verifyToken, authorize(['admin']), async (req, res) => {
 
 // Get seat by ID
 router.get('/seat/:id', verifyToken, authorize(['admin']), async (req, res) => {
+  const cacheKey = `seat-${req.params.id}`;
+  const cachedSeat = cache.get(cacheKey);
+  if (cachedSeat) {
+    return res.status(200).json({
+      status: 'success',
+      data: cachedSeat
+    });
+  }
   try {
     const seatData = await seat.getById(req.params.id);
     if (!seatData) {
@@ -30,6 +49,7 @@ router.get('/seat/:id', verifyToken, authorize(['admin']), async (req, res) => {
         message: 'Kursi tidak ditemukan'
       });
     }
+    cache.set(cacheKey, seatData);
     res.status(200).json({
       status: 'success',
       data: seatData
