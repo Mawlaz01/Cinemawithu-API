@@ -5,8 +5,9 @@ const user = require('../../model/userModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { verifyToken } = require('../../config/middleware/jwt')
+const limiter = require('../../config/middleware/rateLimiter')
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', limiter, async (req, res, next) => {
     let { email, password } = req.body
 
     if (!email) {
