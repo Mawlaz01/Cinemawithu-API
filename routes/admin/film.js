@@ -3,10 +3,21 @@ const router = express.Router()
 const filmModel = require('../../model/filmModel')
 const upload = require('../../config/middleware/uploudPhoto')
 const { verifyToken, authorize } = require('../../config/middleware/jwt')
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 60 });
 
 router.get('/film', verifyToken, authorize(['admin']),async (req, res) => {
+  const cacheKey = 'allFilms';
+  const cachedFilms = cache.get(cacheKey);
+  if (cachedFilms) {
+    return res.status(200).json({
+      status: 'success',
+      data: cachedFilms
+    });
+  }
   try {
     const films = await filmModel.getAll()
+    cache.set(cacheKey, films);
     res.status(200).json({
       status: 'success',
       data: films
@@ -20,6 +31,14 @@ router.get('/film', verifyToken, authorize(['admin']),async (req, res) => {
 })
 
 router.get('/film/:id', verifyToken, authorize(['admin']), async (req, res) => {
+  const cacheKey = `film-${req.params.id}`;
+  const cachedFilm = cache.get(cacheKey);
+  if (cachedFilm) {
+    return res.status(200).json({
+      status: 'success',
+      data: cachedFilm
+    });
+  }
   try {
     const film = await filmModel.getById(req.params.id)
     if (!film) {

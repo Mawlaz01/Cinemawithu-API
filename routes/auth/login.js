@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { verifyToken } = require('../../config/middleware/jwt')
 const limiter = require('../../config/middleware/rateLimiter')
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 60 });
 
 router.post('/login', limiter, async (req, res, next) => {
     let { email, password } = req.body
@@ -55,6 +57,11 @@ router.post('/login', limiter, async (req, res, next) => {
 })
 
 router.get('/profile', verifyToken, async (req, res) => {
+    const cacheKey = `profile-${req.user.id}`;
+    const cachedProfile = cache.get(cacheKey);
+    if (cachedProfile) {
+        return res.status(200).json(cachedProfile);
+    }
     try {
         let userData = null;
         
@@ -67,6 +74,16 @@ router.get('/profile', verifyToken, async (req, res) => {
         if (!userData) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        cache.set(cacheKey, {
+            message: 'OK',
+            data: {
+                id: userData.admin_id || userData.user_id,
+                username: userData.name,
+                email: userData.email,
+                type: req.user.type
+            }
+        });
 
         res.status(200).json({
             message: 'OK',
