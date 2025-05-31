@@ -3,6 +3,7 @@ var router = express.Router()
 const admin = require('../../model/adminModel')
 const user = require('../../model/userModel')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 const { verifyToken } = require('../../config/middleware/jwt')
 
 router.post('/login', async (req, res, next) => {
@@ -30,7 +31,10 @@ router.post('/login', async (req, res, next) => {
 
         if (!userData) {
             return res.status(401).json ({ message: 'Email wrong'})
-        } else if (password !== userData.password) {
+        }
+
+        const validPassword = await bcrypt.compare(password, userData.password)
+        if (!validPassword) {
             return res.status(401).json ({ message: 'Password wrong'})
         }
 

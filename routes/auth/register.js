@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const user = require('../../model/userModel')
+const bcrypt = require('bcrypt')
 
 router.post('/register', async (req, res) => {
     try {
@@ -17,7 +18,10 @@ router.post('/register', async (req, res) => {
         if (!/[a-z]/.test(password)) return res.status(400).json({ message: 'Password must have at least one lowercase letter.' })
         if (!/\d/.test(password)) return res.status(400).json({ message: 'Password must have at least one number.' })
 
-        await user.register({ name, email, password })
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+
+        await user.register({ name, email, password: hashedPassword })
 
         res.status(201).json({ message: 'CREATED' })
     } catch (error) {
