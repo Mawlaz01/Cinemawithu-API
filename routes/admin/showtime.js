@@ -127,6 +127,7 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
     };
 
     const showtimeId = await showtime.create(showtimeData);
+    cache.del('allShowtimes'); // Delete cache to get fresh data
     res.status(201).json({
       status: 'success',
       message: 'Jadwal tayang berhasil ditambahkan',
@@ -222,6 +223,8 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
     };
 
     const affectedRows = await showtime.update(showtimeId, showtimeData);
+    cache.del('allShowtimes'); // Delete cache to get fresh data
+    cache.del(`showtime-${showtimeId}`); // Delete specific showtime cache
     res.status(200).json({
       status: 'success',
       message: 'Jadwal tayang berhasil diperbarui',
@@ -249,6 +252,8 @@ router.delete('/showtime/delete/:id', verifyToken, authorize(['admin']), async (
     }
 
     const affectedRows = await showtime.delete(showtimeId);
+    cache.del('allShowtimes'); // Delete cache to get fresh data
+    cache.del(`showtime-${showtimeId}`); // Delete specific showtime cache
     res.status(200).json({
       status: 'success',
       message: 'Jadwal tayang berhasil dihapus',

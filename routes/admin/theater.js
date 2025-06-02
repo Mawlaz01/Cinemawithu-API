@@ -84,6 +84,7 @@ router.post('/theater/create', verifyToken, authorize(['admin']), async (req, re
     };
 
     const theaterId = await theater.create(theaterData);
+    cache.del('allTheaters'); // Delete cache to get fresh data
     res.status(201).json({
       status: 'success',
       message: 'Theater berhasil ditambahkan',
@@ -127,6 +128,8 @@ router.patch('/theater/update/:id', verifyToken, authorize(['admin']), async (re
     }
 
     const affectedRows = await theater.update(theaterId, theaterData);
+    cache.del('allTheaters'); // Delete cache to get fresh data
+    cache.del(`theater-${theaterId}`); // Delete specific theater cache
     res.status(200).json({
       status: 'success',
       message: 'Theater berhasil diperbarui',
@@ -154,6 +157,8 @@ router.delete('/theater/delete/:id', verifyToken, authorize(['admin']), async (r
     }
 
     const affectedRows = await theater.delete(theaterId);
+    cache.del('allTheaters'); // Delete cache to get fresh data
+    cache.del(`theater-${theaterId}`); // Delete specific theater cache
     res.status(200).json({
       status: 'success',
       message: 'Theater berhasil dihapus',

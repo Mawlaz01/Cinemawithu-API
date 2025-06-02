@@ -5,15 +5,8 @@ const showtimeModel = require('../../model/showtimeModel')
 const seatModel = require('../../model/seatModel')
 const { verifyToken, authorize } = require('../../config/middleware/jwt')
 const bookingModel = require('../../model/bookingModel')
-const NodeCache = require('node-cache');
-const cache = new NodeCache({ stdTTL: 60 });
 
 router.get('/dashboard/detailfilm/:filmId', verifyToken, authorize(['user']), async (req, res) => {
-    const cacheKey = `detailfilm-${req.params.filmId}`;
-    const cachedFilm = cache.get(cacheKey);
-    if (cachedFilm) {
-        return res.json(cachedFilm);
-    }
     try {
         const { filmId } = req.params
 
@@ -36,16 +29,13 @@ router.get('/dashboard/detailfilm/:filmId', verifyToken, authorize(['user']), as
             const showtimes = await showtimeModel.getByFilmId(filmId)
 
             const formattedShowtimes = showtimes.map(showtime => {
-
                 let dateStr;
                 if (showtime.date instanceof Date) {
-
                     const year = showtime.date.getFullYear();
                     const month = String(showtime.date.getMonth() + 1).padStart(2, '0');
                     const day = String(showtime.date.getDate()).padStart(2, '0');
                     dateStr = `${year}-${month}-${day}`;
                 } else if (typeof showtime.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(showtime.date)) {
-
                     dateStr = showtime.date;
                 } else {
                     dateStr = String(showtime.date);
@@ -67,7 +57,6 @@ router.get('/dashboard/detailfilm/:filmId', verifyToken, authorize(['user']), as
             response.data.showtimes = formattedShowtimes;
         }
 
-        cache.set(cacheKey, response);
         res.json(response)
     } catch (error) {
         console.error('Error in detail film route:', error)
@@ -79,11 +68,6 @@ router.get('/dashboard/detailfilm/:filmId', verifyToken, authorize(['user']), as
 })
 
 router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, authorize(['user']), async (req, res) => {
-    const cacheKey = `detailfilm-seat-${req.params.filmId}-${req.params.showtimeId}`;
-    const cachedSeats = cache.get(cacheKey);
-    if (cachedSeats) {
-        return res.json(cachedSeats);
-    }
     try {
         const { filmId, showtimeId } = req.params
 
@@ -138,21 +122,6 @@ router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, author
             ...seat,
             is_available: !bookedSeatsMap.has(seat.seat_id)
         }))
-
-        cache.set(cacheKey, {
-            status: 'success',
-            data: {
-                film_id: film.film_id,
-                film_title: film.title,
-                film_poster: film.poster,
-                showtime: {
-                    date: formatted_date,
-                    time: showtime.time,
-                    theater_name: showtime.theater_name
-                },
-                seats: seatsWithAvailability
-            }
-        });
 
         res.json({
             status: 'success',
@@ -299,11 +268,6 @@ router.post('/booking/history/:showtimeId', verifyToken, authorize(['user']), as
 })
 
 router.get('/booking/:filmId/:showtimeId/:bookingId/status', verifyToken, authorize(['user']), async (req, res) => {
-    const cacheKey = `booking-status-${req.params.bookingId}`;
-    const cachedBookingStatus = cache.get(cacheKey);
-    if (cachedBookingStatus) {
-        return res.json(cachedBookingStatus);
-    }
     try {
         const { filmId, showtimeId, bookingId } = req.params;
         const user_id = req.user.id;
@@ -317,27 +281,6 @@ router.get('/booking/:filmId/:showtimeId/:bookingId/status', verifyToken, author
                 message: 'Booking tidak ditemukan'
             });
         }
-
-        cache.set(cacheKey, {
-            status: 'success',
-            data: {
-                film: {
-                    poster: bookingDetails.poster,
-                    title: bookingDetails.film_title
-                },
-                showtime: {
-                    theater: bookingDetails.theater_name,
-                    date: bookingDetails.date,
-                    time: bookingDetails.time
-                },
-                booking: {
-                    quantity: bookingDetails.quantity,
-                    seats: bookingDetails.seat_labels.split(','),
-                    total_amount: bookingDetails.total_amount,
-                    status: bookingDetails.booking_status
-                }
-            }
-        });
 
         res.json({
             status: 'success',

@@ -87,6 +87,7 @@ router.post('/film/create', verifyToken, authorize(['admin']), upload.single('po
     }
 
     const filmId = await filmModel.create(filmData)
+    cache.del('allFilms');
     res.status(201).json({
       status: 'success',
       message: 'Film berhasil ditambahkan',
@@ -137,6 +138,8 @@ router.patch('/film/update/:id', verifyToken, authorize(['admin']), upload.singl
     }
 
     const affectedRows = await filmModel.update(filmId, filmData)
+    cache.del('allFilms');
+    cache.del(`film-${filmId}`);
     res.status(200).json({
       status: 'success',
       message: 'Film berhasil diperbarui',
@@ -163,6 +166,8 @@ router.delete('/film/delete/:id', verifyToken, authorize(['admin']), async (req,
     }
 
     const affectedRows = await filmModel.delete(filmId)
+    cache.del('allFilms');
+    cache.del(`film-${filmId}`);
     res.status(200).json({
       status: 'success',
       message: 'Film berhasil dihapus',

@@ -96,6 +96,7 @@ router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) 
     };
 
     const seatId = await seat.create(seatData);
+    cache.del('allSeats'); // Delete cache to get fresh data
     res.status(201).json({
       status: 'success',
       message: 'Kursi berhasil ditambahkan',
@@ -158,6 +159,8 @@ router.patch('/seat/update/:id', verifyToken, authorize(['admin']), async (req, 
     };
 
     const affectedRows = await seat.update(seatId, seatData);
+    cache.del('allSeats'); // Delete cache to get fresh data
+    cache.del(`seat-${seatId}`); // Delete specific seat cache
     res.status(200).json({
       status: 'success',
       message: 'Kursi berhasil diperbarui',
@@ -193,6 +196,8 @@ router.delete('/seat/delete/:id', verifyToken, authorize(['admin']), async (req,
     }
 
     const affectedRows = await seat.delete(seatId);
+    cache.del('allSeats'); // Delete cache to get fresh data
+    cache.del(`seat-${seatId}`); // Delete specific seat cache
     res.status(200).json({
       status: 'success',
       message: 'Kursi berhasil dihapus',
