@@ -7,7 +7,6 @@ const { verifyToken, authorize } = require('../../config/middleware/jwt');
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 });
 
-// Get all showtimes
 router.get('/showtime', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = 'allShowtimes';
   const cachedShowtimes = cache.get(cacheKey);
@@ -32,7 +31,6 @@ router.get('/showtime', verifyToken, authorize(['admin']), async (req, res) => {
   }
 });
 
-// Get showtime by ID
 router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = `showtime-${req.params.id}`;
   const cachedShowtime = cache.get(cacheKey);
@@ -63,7 +61,6 @@ router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) 
   }
 });
 
-// Create new showtime
 router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     if (!req.body.film_id || !req.body.theater_id || !req.body.date || !req.body.time || !req.body.price) {
@@ -73,7 +70,6 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
       });
     }
 
-    // Verify film exists
     const filmData = await film.getById(req.body.film_id);
     if (!filmData) {
       return res.status(404).json({
@@ -82,7 +78,6 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
       });
     }
 
-    // Verify theater exists
     const theaterData = await theater.getById(req.body.theater_id);
     if (!theaterData) {
       return res.status(404).json({
@@ -91,7 +86,6 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
       });
     }
 
-    // Validate price
     const price = parseFloat(req.body.price);
     if (isNaN(price) || price <= 0) {
       return res.status(400).json({
@@ -100,7 +94,6 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
       });
     }
 
-    // Validate date format
     const date = new Date(req.body.date);
     if (isNaN(date.getTime())) {
       return res.status(400).json({
@@ -109,7 +102,6 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
       });
     }
 
-    // Validate time format
     const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(req.body.time)) {
       return res.status(400).json({
@@ -127,7 +119,7 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
     };
 
     const showtimeId = await showtime.create(showtimeData);
-    cache.del('allShowtimes'); // Delete cache to get fresh data
+    cache.del('allShowtimes');
     res.status(201).json({
       status: 'success',
       message: 'Jadwal tayang berhasil ditambahkan',
@@ -141,7 +133,6 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
   }
 });
 
-// Update showtime
 router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const showtimeId = req.params.id;
@@ -154,7 +145,6 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
       });
     }
 
-    // Check if film exists if film_id is provided
     if (req.body.film_id) {
       const filmData = await film.getById(req.body.film_id);
       if (!filmData) {
@@ -165,7 +155,6 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
       }
     }
 
-    // Check if theater exists if theater_id is provided
     if (req.body.theater_id) {
       const theaterData = await theater.getById(req.body.theater_id);
       if (!theaterData) {
@@ -176,7 +165,6 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
       }
     }
 
-    // Validate price if provided
     let price = existingShowtime.price;
     if (req.body.price) {
       price = parseFloat(req.body.price);
@@ -188,7 +176,6 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
       }
     }
 
-    // Validate date format if provided
     let date = existingShowtime.date;
     if (req.body.date) {
       const newDate = new Date(req.body.date);
@@ -201,7 +188,6 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
       date = req.body.date;
     }
 
-    // Validate time format if provided
     let time = existingShowtime.time;
     if (req.body.time) {
       const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -223,8 +209,8 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
     };
 
     const affectedRows = await showtime.update(showtimeId, showtimeData);
-    cache.del('allShowtimes'); // Delete cache to get fresh data
-    cache.del(`showtime-${showtimeId}`); // Delete specific showtime cache
+    cache.del('allShowtimes');
+    cache.del(`showtime-${showtimeId}`);
     res.status(200).json({
       status: 'success',
       message: 'Jadwal tayang berhasil diperbarui',
@@ -238,7 +224,6 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
   }
 });
 
-// Delete showtime
 router.delete('/showtime/delete/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const showtimeId = req.params.id;
@@ -252,8 +237,8 @@ router.delete('/showtime/delete/:id', verifyToken, authorize(['admin']), async (
     }
 
     const affectedRows = await showtime.delete(showtimeId);
-    cache.del('allShowtimes'); // Delete cache to get fresh data
-    cache.del(`showtime-${showtimeId}`); // Delete specific showtime cache
+    cache.del('allShowtimes');
+    cache.del(`showtime-${showtimeId}`);
     res.status(200).json({
       status: 'success',
       message: 'Jadwal tayang berhasil dihapus',

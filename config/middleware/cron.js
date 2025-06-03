@@ -1,6 +1,5 @@
 const bookingModel = require('../../model/bookingModel');
 
-// Function to check expired bookings
 async function checkExpiredBookings() {
     try {
         const updatedCount = await bookingModel.checkAndUpdateExpiredBookings();
@@ -12,10 +11,8 @@ async function checkExpiredBookings() {
     }
 }
 
-// Run the check every minute
 setInterval(checkExpiredBookings, 60000);
 
-// Run initial check when server starts
 checkExpiredBookings();
 
 console.log('Expired bookings checker started'); 

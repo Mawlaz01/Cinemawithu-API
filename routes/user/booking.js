@@ -71,7 +71,6 @@ router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, author
     try {
         const { filmId, showtimeId } = req.params
 
-        // Verify if film exists
         const film = await filmModel.getById(filmId)
         if (!film) {
             return res.status(404).json({
@@ -80,7 +79,6 @@ router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, author
             })
         }
 
-        // Get showtime details
         const showtime = await showtimeModel.getById(showtimeId)
         if (!showtime) {
             return res.status(404).json({
@@ -89,7 +87,6 @@ router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, author
             })
         }
 
-        // Format date
         let dateStr;
         if (showtime.date instanceof Date) {
             const year = showtime.date.getFullYear();
@@ -108,16 +105,10 @@ router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, author
             formatted_date = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
         }
 
-        // Get all seats for the film
         const seats = await seatModel.getSeatsByFilmId(filmId)
-        
-        // Get booked seats for the film
         const bookedSeats = await seatModel.getBookedSeatsByFilmId(filmId, showtimeId)
-        
-        // Create a map of booked seats for easy lookup
         const bookedSeatsMap = new Map(bookedSeats.map(seat => [seat.seat_id, true]))
 
-        // Add availability status to each seat
         const seatsWithAvailability = seats.map(seat => ({
             ...seat,
             is_available: !bookedSeatsMap.has(seat.seat_id)
@@ -150,14 +141,12 @@ router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req
     try {
         const { showtimeId } = req.params
         let { seat_ids, quantity } = req.body
-        const user_id = req.user.id // Get user_id from JWT token
+        const user_id = req.user.id
 
-        // Jika seat_ids masih string, ubah jadi array
         if (typeof seat_ids === 'string') {
             seat_ids = seat_ids.split(',').map(id => parseInt(id.trim()))
         }
 
-        // Check for existing pending bookings for the user
         const existingBookings = await bookingModel.getBookingsByUserId(user_id);
         const hasPendingBooking = existingBookings.some(booking => booking.status === 'pending');
 
@@ -168,7 +157,6 @@ router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req
             });
         }
 
-        // Validate required fields
         if (!seat_ids || !quantity) {
             return res.status(400).json({
                 status: 'error',
@@ -176,7 +164,6 @@ router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req
             })
         }
 
-        // Validate seat_ids is an array
         if (!Array.isArray(seat_ids) || seat_ids.length === 0) {
             return res.status(400).json({
                 status: 'error',
@@ -184,7 +171,6 @@ router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req
             })
         }
 
-        // Validate quantity matches number of seats
         if (parseInt(quantity) !== seat_ids.length) {
             return res.status(400).json({
                 status: 'error',
@@ -192,7 +178,6 @@ router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req
             })
         }
 
-        // Get showtime details to get the price
         const showtime = await showtimeModel.getById(showtimeId);
         if (!showtime) {
             return res.status(404).json({
@@ -201,10 +186,8 @@ router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req
             });
         }
 
-        // Calculate total amount
         const total_amount = showtime.price * quantity;
 
-        // Create booking
         const booking_id = await bookingModel.createBooking({
             user_id,
             showtime_id: showtimeId,
@@ -212,10 +195,8 @@ router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req
             total_amount
         })
 
-        // Assign seats to booking
         await bookingModel.assignSeatsToBooking(booking_id, seat_ids)
 
-        // Get the created booking
         const booking = await bookingModel.getBookingById(booking_id)
 
         res.status(201).json({
@@ -236,9 +217,8 @@ router.post('/booking/history/:showtimeId', verifyToken, authorize(['user']), as
     try {
         const { showtimeId } = req.params
         const { booking_id } = req.body
-        const user_id = req.user.id // Get user_id from JWT token
+        const user_id = req.user.id
 
-        // Validate required fields
         if (!booking_id) {
             return res.status(400).json({
                 status: 'error',
@@ -246,7 +226,6 @@ router.post('/booking/history/:showtimeId', verifyToken, authorize(['user']), as
             })
         }
 
-        // Create booking history entry
         const historyId = await bookingModel.createBookingHistory({
             user_id,
             booking_id,
@@ -272,7 +251,6 @@ router.get('/booking/:filmId/:showtimeId/:bookingId/status', verifyToken, author
         const { filmId, showtimeId, bookingId } = req.params;
         const user_id = req.user.id;
 
-        // Get booking details
         const bookingDetails = await bookingModel.getDetailedBookingInfo(filmId, showtimeId, bookingId);
         
         if (!bookingDetails) {

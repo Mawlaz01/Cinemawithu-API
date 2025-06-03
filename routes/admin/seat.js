@@ -6,7 +6,6 @@ const { verifyToken, authorize } = require('../../config/middleware/jwt');
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 });
 
-// Get all seats
 router.get('/seat', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = 'allSeats';
   const cachedSeats = cache.get(cacheKey);
@@ -31,7 +30,6 @@ router.get('/seat', verifyToken, authorize(['admin']), async (req, res) => {
   }
 });
 
-// Get seat by ID
 router.get('/seat/:id', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = `seat-${req.params.id}`;
   const cachedSeat = cache.get(cacheKey);
@@ -62,7 +60,6 @@ router.get('/seat/:id', verifyToken, authorize(['admin']), async (req, res) => {
   }
 });
 
-// Create new seat
 router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     if (!req.body.theater_id || !req.body.seat_label) {
@@ -72,7 +69,6 @@ router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) 
       });
     }
 
-    // Verify theater exists
     const theaterData = await theater.getById(req.body.theater_id);
     if (!theaterData) {
       return res.status(404).json({
@@ -81,7 +77,6 @@ router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) 
       });
     }
 
-    // Validate seat label format (optional)
     const seatLabelRegex = /^[A-Z][0-9]+$/;
     if (!seatLabelRegex.test(req.body.seat_label)) {
       return res.status(400).json({
@@ -96,14 +91,13 @@ router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) 
     };
 
     const seatId = await seat.create(seatData);
-    cache.del('allSeats'); // Delete cache to get fresh data
+    cache.del('allSeats');
     res.status(201).json({
       status: 'success',
       message: 'Kursi berhasil ditambahkan',
       data: { seat_id: seatId }
     });
   } catch (error) {
-    // Check for unique constraint violation
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({
         status: 'error',
@@ -118,7 +112,6 @@ router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) 
   }
 });
 
-// Update seat
 router.patch('/seat/update/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const seatId = req.params.id;
@@ -131,7 +124,6 @@ router.patch('/seat/update/:id', verifyToken, authorize(['admin']), async (req, 
       });
     }
 
-    // If theater_id is being updated, verify theater exists
     if (req.body.theater_id) {
       const theaterData = await theater.getById(req.body.theater_id);
       if (!theaterData) {
@@ -142,7 +134,6 @@ router.patch('/seat/update/:id', verifyToken, authorize(['admin']), async (req, 
       }
     }
 
-    // If seat_label is being updated, validate format
     if (req.body.seat_label) {
       const seatLabelRegex = /^[A-Z][0-9]+$/;
       if (!seatLabelRegex.test(req.body.seat_label)) {
@@ -159,15 +150,14 @@ router.patch('/seat/update/:id', verifyToken, authorize(['admin']), async (req, 
     };
 
     const affectedRows = await seat.update(seatId, seatData);
-    cache.del('allSeats'); // Delete cache to get fresh data
-    cache.del(`seat-${seatId}`); // Delete specific seat cache
+    cache.del('allSeats');
+    cache.del(`seat-${seatId}`);
     res.status(200).json({
       status: 'success',
       message: 'Kursi berhasil diperbarui',
       data: { affected_rows: affectedRows }
     });
   } catch (error) {
-    // Check for unique constraint violation
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({
         status: 'error',
@@ -182,7 +172,6 @@ router.patch('/seat/update/:id', verifyToken, authorize(['admin']), async (req, 
   }
 });
 
-// Delete seat
 router.delete('/seat/delete/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const seatId = req.params.id;
@@ -196,8 +185,8 @@ router.delete('/seat/delete/:id', verifyToken, authorize(['admin']), async (req,
     }
 
     const affectedRows = await seat.delete(seatId);
-    cache.del('allSeats'); // Delete cache to get fresh data
-    cache.del(`seat-${seatId}`); // Delete specific seat cache
+    cache.del('allSeats');
+    cache.del(`seat-${seatId}`);
     res.status(200).json({
       status: 'success',
       message: 'Kursi berhasil dihapus',
