@@ -101,7 +101,6 @@ class bookingModel {
                 if (err) {
                     reject(err)
                 } else {
-                    // You might want to join with other tables like bookings, showtimes, films for a more detailed history view
                     resolve(results)
                 }
             })
@@ -151,7 +150,6 @@ class bookingModel {
         return new Promise((resolve, reject) => {
             const { booking_id, gateway_txn_id, amount, method, status, paid_at } = data;
             
-            // Update booking status to pending
             connection.query(
                 'UPDATE bookings SET status = ? WHERE booking_id = ?',
                 ['pending', booking_id],
@@ -161,7 +159,6 @@ class bookingModel {
                         return;
                     }
                     
-                    // Insert payment record
                     connection.query(
                         'INSERT INTO payments (booking_id, gateway_txn_id, amount, method, status, paid_at) VALUES (?, ?, ?, ?, ?, ?)',
                         [booking_id, gateway_txn_id, amount, method, status, paid_at],
@@ -189,7 +186,6 @@ class bookingModel {
                         return;
                     }
 
-                    // Update booking status based on payment status
                     let bookingStatus;
                     if (status === 'settlement') {
                         bookingStatus = 'paid';
@@ -261,7 +257,6 @@ class bookingModel {
                     reject(err);
                 } else {
                     if (results.length > 0) {
-                        // Format the date
                         const booking = results[0];
                         if (booking.date) {
                             const date = new Date(booking.date);
@@ -388,7 +383,6 @@ class bookingModel {
                     reject(err);
                 } else {
                     if (results.length > 0) {
-                        // Format the date
                         const booking = results[0];
                         if (booking.date) {
                             const date = new Date(booking.date);
@@ -397,7 +391,6 @@ class bookingModel {
                             const day = String(date.getDate()).padStart(2, '0');
                             booking.date = `${day}/${month}/${year}`;
                         }
-                        // Set default payment status if null
                         if (!booking.payment_status) {
                             booking.payment_status = 'pending';
                         }
@@ -412,7 +405,6 @@ class bookingModel {
 
     static async checkAndUpdateExpiredBookings() {
         return new Promise((resolve, reject) => {
-            // Get all pending bookings that are older than 10 minutes
             connection.query(`
                 SELECT b.booking_id, p.gateway_txn_id
                 FROM bookings b
@@ -426,13 +418,10 @@ class bookingModel {
                     return;
                 }
 
-                // Update each expired booking
                 for (const booking of results) {
                     try {
-                        // Update booking status to cancelled
                         await this.updateBookingStatus(booking.booking_id, 'cancelled');
                         
-                        // Update payment status to expired
                         if (booking.gateway_txn_id) {
                             await this.updatePaymentStatus(booking.gateway_txn_id, 'expired', 'UNSPECIFIED');
                         }

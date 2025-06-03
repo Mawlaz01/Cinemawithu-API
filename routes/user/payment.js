@@ -51,7 +51,6 @@ router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["
       .then(async (transaction) => {
         const transactionToken = transaction.token;
         
-        // Create payment record
         const paymentData = {
           booking_id: bookingId,
           gateway_txn_id: parameter.transaction_details.order_id,
@@ -106,7 +105,6 @@ router.get("/payment/status/:gatewayTxnId", verifyToken, authorize(["user"]), as
       paymentStatus = 'expired';
     }
 
-    // Update payment record
     await bookingModel.updatePaymentStatus(
       req.params.gatewayTxnId,
       paymentStatus,

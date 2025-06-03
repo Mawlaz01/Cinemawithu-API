@@ -5,7 +5,6 @@ const { verifyToken, authorize } = require('../../config/middleware/jwt');
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 });
 
-// Get all theaters
 router.get('/theater', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = 'allTheaters';
   const cachedTheaters = cache.get(cacheKey);
@@ -30,7 +29,6 @@ router.get('/theater', verifyToken, authorize(['admin']), async (req, res) => {
   }
 });
 
-// Get theater by ID
 router.get('/theater/:id', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = `theater-${req.params.id}`;
   const theaterData = cache.get(cacheKey);
@@ -60,7 +58,6 @@ router.get('/theater/:id', verifyToken, authorize(['admin']), async (req, res) =
   }
 });
 
-// Create new theater
 router.post('/theater/create', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     if (!req.body.name || !req.body.total_seats) {
@@ -84,7 +81,7 @@ router.post('/theater/create', verifyToken, authorize(['admin']), async (req, re
     };
 
     const theaterId = await theater.create(theaterData);
-    cache.del('allTheaters'); // Delete cache to get fresh data
+    cache.del('allTheaters');
     res.status(201).json({
       status: 'success',
       message: 'Theater berhasil ditambahkan',
@@ -98,7 +95,6 @@ router.post('/theater/create', verifyToken, authorize(['admin']), async (req, re
   }
 });
 
-// Update theater
 router.patch('/theater/update/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const theaterId = req.params.id;
@@ -128,8 +124,8 @@ router.patch('/theater/update/:id', verifyToken, authorize(['admin']), async (re
     }
 
     const affectedRows = await theater.update(theaterId, theaterData);
-    cache.del('allTheaters'); // Delete cache to get fresh data
-    cache.del(`theater-${theaterId}`); // Delete specific theater cache
+    cache.del('allTheaters');
+    cache.del(`theater-${theaterId}`);
     res.status(200).json({
       status: 'success',
       message: 'Theater berhasil diperbarui',
@@ -143,7 +139,6 @@ router.patch('/theater/update/:id', verifyToken, authorize(['admin']), async (re
   }
 });
 
-// Delete theater
 router.delete('/theater/delete/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const theaterId = req.params.id;
@@ -157,8 +152,8 @@ router.delete('/theater/delete/:id', verifyToken, authorize(['admin']), async (r
     }
 
     const affectedRows = await theater.delete(theaterId);
-    cache.del('allTheaters'); // Delete cache to get fresh data
-    cache.del(`theater-${theaterId}`); // Delete specific theater cache
+    cache.del('allTheaters');
+    cache.del(`theater-${theaterId}`);
     res.status(200).json({
       status: 'success',
       message: 'Theater berhasil dihapus',
