@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const jwt = require('jsonwebtoken');
 
+// Logout user dengan validasi token
 router.post('/logout', (req, res) => {
     const token = req.headers.authorization?.split(' ')[1] 
 

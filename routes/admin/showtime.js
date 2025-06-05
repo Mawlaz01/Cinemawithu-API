@@ -7,6 +7,7 @@ const { verifyToken, authorize } = require('../../config/middleware/jwt');
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 });
 
+// Mengambil semua data jadwal tayang dari database dengan caching
 router.get('/showtime', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = 'allShowtimes';
   const cachedShowtimes = cache.get(cacheKey);
@@ -31,6 +32,7 @@ router.get('/showtime', verifyToken, authorize(['admin']), async (req, res) => {
   }
 });
 
+// Mengambil data jadwal tayang berdasarkan ID dengan caching
 router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = `showtime-${req.params.id}`;
   const cachedShowtime = cache.get(cacheKey);
@@ -61,6 +63,7 @@ router.get('/showtime/:id', verifyToken, authorize(['admin']), async (req, res) 
   }
 });
 
+// Membuat data jadwal tayang baru dengan validasi film dan theater
 router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     if (!req.body.film_id || !req.body.theater_id || !req.body.date || !req.body.time || !req.body.price) {
@@ -133,6 +136,7 @@ router.post('/showtime/create', verifyToken, authorize(['admin']), async (req, r
   }
 });
 
+// Mengupdate data jadwal tayang berdasarkan ID dengan validasi film dan theater
 router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const showtimeId = req.params.id;
@@ -224,6 +228,7 @@ router.patch('/showtime/update/:id', verifyToken, authorize(['admin']), async (r
   }
 });
 
+// Menghapus data jadwal tayang berdasarkan ID
 router.delete('/showtime/delete/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const showtimeId = req.params.id;

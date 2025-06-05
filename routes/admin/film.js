@@ -6,6 +6,7 @@ const { verifyToken, authorize } = require('../../config/middleware/jwt')
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 });
 
+// Mengambil semua data film dari database dengan caching
 router.get('/film', verifyToken, authorize(['admin']),async (req, res) => {
   const cacheKey = 'allFilms';
   const cachedFilms = cache.get(cacheKey);
@@ -30,6 +31,7 @@ router.get('/film', verifyToken, authorize(['admin']),async (req, res) => {
   }
 })
 
+// Mengambil data film berdasarkan ID dengan caching
 router.get('/film/:id', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = `film-${req.params.id}`;
   const cachedFilm = cache.get(cacheKey);
@@ -59,6 +61,7 @@ router.get('/film/:id', verifyToken, authorize(['admin']), async (req, res) => {
   }
 })
 
+// Membuat data film baru dengan upload poster
 router.post('/film/create', verifyToken, authorize(['admin']), upload.single('poster'), async (req, res) => {
   try {
     if (!req.body.title || !req.body.duration_min) {
@@ -101,6 +104,7 @@ router.post('/film/create', verifyToken, authorize(['admin']), upload.single('po
   }
 })
 
+// Mengupdate data film berdasarkan ID dengan upload poster opsional
 router.patch('/film/update/:id', verifyToken, authorize(['admin']), upload.single('poster'), async (req, res) => {
   try {
     const filmId = req.params.id
@@ -153,6 +157,7 @@ router.patch('/film/update/:id', verifyToken, authorize(['admin']), upload.singl
   }
 })
 
+// Menghapus data film berdasarkan ID
 router.delete('/film/delete/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const filmId = req.params.id

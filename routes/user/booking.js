@@ -6,6 +6,7 @@ const seatModel = require('../../model/seatModel')
 const { verifyToken, authorize } = require('../../config/middleware/jwt')
 const bookingModel = require('../../model/bookingModel')
 
+// Mengambil detail film dan jadwal tayangnya
 router.get('/dashboard/detailfilm/:filmId', verifyToken, authorize(['user']), async (req, res) => {
     try {
         const { filmId } = req.params
@@ -67,6 +68,7 @@ router.get('/dashboard/detailfilm/:filmId', verifyToken, authorize(['user']), as
     }
 })
 
+// Mengambil data kursi yang tersedia untuk film dan jadwal tertentu
 router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, authorize(['user']), async (req, res) => {
     try {
         const { filmId, showtimeId } = req.params
@@ -137,6 +139,7 @@ router.get('/dashboard/detailfilm/:filmId/:showtimeId/seat', verifyToken, author
     }
 })
 
+// Membuat booking baru dengan validasi kursi dan jumlah tiket
 router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req, res) => {
     try {
         const { showtimeId } = req.params
@@ -213,6 +216,7 @@ router.post('/booking/:showtimeId', verifyToken, authorize(['user']), async (req
     }
 })
 
+// Membuat history booking untuk tracking
 router.post('/booking/history/:showtimeId', verifyToken, authorize(['user']), async (req, res) => {
     try {
         const { showtimeId } = req.params
@@ -246,6 +250,7 @@ router.post('/booking/history/:showtimeId', verifyToken, authorize(['user']), as
     }
 })
 
+// Mengambil status booking berdasarkan ID
 router.get('/booking/:filmId/:showtimeId/:bookingId/status', verifyToken, authorize(['user']), async (req, res) => {
     try {
         const { filmId, showtimeId, bookingId } = req.params;

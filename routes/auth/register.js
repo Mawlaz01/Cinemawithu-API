@@ -3,6 +3,7 @@ var router = express.Router();
 const user = require('../../model/userModel')
 const bcrypt = require('bcrypt')
 
+// Registrasi user baru dengan validasi password dan email
 router.post('/register', async (req, res) => {
     try {
         let { name, email, password } = req.body
