@@ -1,6 +1,7 @@
 const connection = require('../config/database')
 
 class theaterModel {
+    // Mengambil semua data theater dari database
     static async getAll() {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM theaters', (err, results) => {
@@ -13,6 +14,7 @@ class theaterModel {
         })
     }
 
+    // Mengambil data theater berdasarkan ID
     static async getById(id) {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM theaters WHERE theater_id = ?', [id], (err, results) => {
@@ -25,6 +27,7 @@ class theaterModel {
         })
     }
 
+    // Membuat data theater baru
     static async create(data) {
         return new Promise((resolve, reject) => {
             const { name, total_seats } = data
@@ -45,6 +48,7 @@ class theaterModel {
         })
     }
 
+    // Mengupdate data theater berdasarkan ID
     static async update(id, data) {
         return new Promise((resolve, reject) => {
             const { name, total_seats } = data
@@ -65,6 +69,7 @@ class theaterModel {
         })
     }
 
+    // Menghapus data theater berdasarkan ID
     static async delete(id) {
         return new Promise((resolve, reject) => {
             connection.query('DELETE FROM theaters WHERE theater_id = ?', [id], (err, results) => {
