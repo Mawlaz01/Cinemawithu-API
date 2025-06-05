@@ -1,6 +1,7 @@
 const connection = require('../config/database')
 
 class filmModel {
+    // Mengambil semua data film dari database
     static async getAll() {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM films', (err, results) => {
@@ -13,6 +14,7 @@ class filmModel {
         })
     }
 
+    // Mengambil data film berdasarkan ID
     static async getById(id) {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM films WHERE film_id = ?', [id], (err, results) => {
@@ -25,6 +27,7 @@ class filmModel {
         })
     }
 
+    // Membuat data film baru
     static async create(data) {
         return new Promise((resolve, reject) => {
             const { title, poster, genre, description, duration_min, release_date, status } = data
@@ -45,6 +48,7 @@ class filmModel {
         })
     }
 
+    // Mengupdate data film berdasarkan ID
     static async update(id, data) {
         return new Promise((resolve, reject) => {
             const { title, poster, genre, description, duration_min, release_date, status } = data
@@ -62,6 +66,7 @@ class filmModel {
         })
     }
 
+    // Menghapus data film berdasarkan ID
     static async delete(id) {
         return new Promise((resolve, reject) => {
             connection.query('DELETE FROM films WHERE film_id = ?', [id], (err, results) => {
@@ -74,6 +79,7 @@ class filmModel {
         })
     }
 
+    // Mengambil film yang sedang tayang
     static async getNowShowing() {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM films WHERE status = ?', ['now_showing'], (err, results) => {
@@ -86,6 +92,7 @@ class filmModel {
         })
     }
 
+    // Mengambil film yang akan datang
     static async getUpcoming() {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM films WHERE status = ?', ['upcoming'], (err, results) => {

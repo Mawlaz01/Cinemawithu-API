@@ -1,6 +1,7 @@
 const connection = require('../config/database')
 
 class seatModel {
+    // Mengambil semua data kursi dengan detail theater
     static async getAll() {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -17,6 +18,7 @@ class seatModel {
         })
     }
 
+    // Mengambil data kursi berdasarkan ID dengan detail theater
     static async getById(id) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -34,6 +36,7 @@ class seatModel {
         })
     }
 
+    // Membuat data kursi baru
     static async create(data) {
         return new Promise((resolve, reject) => {
             const { theater_id, seat_label } = data
@@ -52,6 +55,7 @@ class seatModel {
         })
     }
 
+    // Mengupdate data kursi berdasarkan ID
     static async update(id, data) {
         return new Promise((resolve, reject) => {
             const { theater_id, seat_label } = data
@@ -70,6 +74,7 @@ class seatModel {
         })
     }
 
+    // Menghapus data kursi berdasarkan ID
     static async delete(id) {
         return new Promise((resolve, reject) => {
             connection.query('DELETE FROM seats WHERE seat_id = ?', [id], (err, results) => {
@@ -82,6 +87,7 @@ class seatModel {
         })
     }
 
+    // Mengambil semua kursi yang tersedia untuk film tertentu
     static async getSeatsByFilmId(filmId) {
         return new Promise((resolve, reject) => {
             const query = `
@@ -101,6 +107,7 @@ class seatModel {
         })
     }
 
+    // Mengambil kursi yang sudah dipesan untuk film dan jadwal tertentu
     static async getBookedSeatsByFilmId(filmId, showtimeId) {
         return new Promise((resolve, reject) => {
             const query = `

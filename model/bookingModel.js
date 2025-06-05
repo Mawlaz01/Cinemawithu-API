@@ -1,6 +1,7 @@
 const connection = require('../config/database')
 
 class bookingModel {
+    // Membuat booking baru
     static async createBooking(data) {
         return new Promise((resolve, reject) => {
             const { user_id, showtime_id, quantity, total_amount } = data
@@ -19,6 +20,7 @@ class bookingModel {
         })
     }
 
+    // Menambahkan kursi ke booking
     static async assignSeatsToBooking(booking_id, seat_ids) {
         return new Promise((resolve, reject) => {
             const values = seat_ids.map(seat_id => [booking_id, seat_id])
@@ -37,6 +39,7 @@ class bookingModel {
         })
     }
 
+    // Mengambil data booking berdasarkan ID
     static async getBookingById(id) {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM bookings WHERE booking_id = ?', [id], (err, results) => {
@@ -49,6 +52,7 @@ class bookingModel {
         })
     }
 
+    // Mengambil semua booking berdasarkan ID user
     static async getBookingsByUserId(user_id) {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM bookings WHERE user_id = ?', [user_id], (err, results) => {
@@ -61,6 +65,7 @@ class bookingModel {
         })
     }
 
+    // Mengupdate status booking
     static async updateBookingStatus(id, status) {
         return new Promise((resolve, reject) => {
             connection.query(
@@ -77,6 +82,7 @@ class bookingModel {
         })
     }
 
+    // Membuat history booking
     static async createBookingHistory(data) {
         return new Promise((resolve, reject) => {
             const { user_id, booking_id, showtime_id } = data
@@ -95,6 +101,7 @@ class bookingModel {
         })
     }
 
+    // Mengambil history booking berdasarkan ID user
     static async getBookingHistoryByUserId(user_id) {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM booking_history WHERE user_id = ?', [user_id], (err, results) => {
@@ -107,6 +114,7 @@ class bookingModel {
         })
     }
 
+    // Mengambil booking berdasarkan ID jadwal tayang
     static async getBookingByShowtimeId(showtime_id) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -126,6 +134,7 @@ class bookingModel {
         })
     }
 
+    // Mengambil history booking berdasarkan ID jadwal tayang
     static async getBookingHistoryByShowtimeId(showtime_id) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -146,6 +155,7 @@ class bookingModel {
         })
     }
 
+    // Membuat data pembayaran baru
     static async createPayment(data) {
         return new Promise((resolve, reject) => {
             const { booking_id, gateway_txn_id, amount, method, status, paid_at } = data;
@@ -175,6 +185,7 @@ class bookingModel {
         });
     }
 
+    // Mengupdate status pembayaran
     static async updatePaymentStatus(gateway_txn_id, status, method) {
         return new Promise((resolve, reject) => {
             connection.query(
@@ -213,6 +224,7 @@ class bookingModel {
         });
     }
 
+    // Mengambil data pembayaran berdasarkan ID booking
     static async getPaymentByBookingId(booking_id) {
         return new Promise((resolve, reject) => {
             connection.query(
@@ -229,6 +241,7 @@ class bookingModel {
         });
     }
 
+    // Mengambil detail informasi booking
     static async getDetailedBookingInfo(filmId, showtimeId, bookingId) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -274,6 +287,7 @@ class bookingModel {
         });
     }
 
+    // Mengambil detail history booking berdasarkan ID user
     static async getDetailedBookingHistoryByUserId(user_id) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -313,6 +327,7 @@ class bookingModel {
         });
     }
 
+    // Mengambil detail history booking berdasarkan ID jadwal tayang
     static async getDetailedBookingHistoryByShowtimeId(showtimeId) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -350,6 +365,7 @@ class bookingModel {
         });
     }
 
+    // Mengambil detail history booking berdasarkan ID booking
     static async getDetailedBookingHistoryByBookingId(booking_id) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -403,6 +419,7 @@ class bookingModel {
         });
     }
 
+    // Mengecek dan mengupdate booking yang expired
     static async checkAndUpdateExpiredBookings() {
         return new Promise((resolve, reject) => {
             connection.query(`

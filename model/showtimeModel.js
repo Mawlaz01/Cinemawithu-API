@@ -1,6 +1,7 @@
 const connection = require('../config/database')
 
 class showtimeModel {
+    // Mengambil semua jadwal tayang dengan detail film dan theater
     static async getAll() {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -19,6 +20,7 @@ class showtimeModel {
         })
     }
 
+    // Mengambil jadwal tayang berdasarkan ID dengan detail film dan theater
     static async getById(id) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -37,6 +39,7 @@ class showtimeModel {
         })
     }
 
+    // Mengambil jadwal tayang berdasarkan ID film
     static async getByFilmId(filmId) {
         return new Promise((resolve, reject) => {
             const query = `
@@ -56,6 +59,7 @@ class showtimeModel {
         })
     }
 
+    // Mengambil jadwal tayang berdasarkan ID theater
     static async getByTheaterId(theaterId) {
         return new Promise((resolve, reject) => {
             connection.query(`
@@ -75,6 +79,7 @@ class showtimeModel {
         })
     }
 
+    // Membuat jadwal tayang baru
     static async create(data) {
         return new Promise((resolve, reject) => {
             const { film_id, theater_id, date, time, price } = data
@@ -93,6 +98,7 @@ class showtimeModel {
         })
     }
 
+    // Mengupdate jadwal tayang berdasarkan ID
     static async update(id, data) {
         return new Promise((resolve, reject) => {
             const { film_id, theater_id, date, time, price } = data
@@ -111,6 +117,7 @@ class showtimeModel {
         })
     }
 
+    // Menghapus jadwal tayang berdasarkan ID
     static async delete(id) {
         return new Promise((resolve, reject) => {
             connection.query('DELETE FROM showtimes WHERE showtime_id = ?', [id], (err, results) => {
