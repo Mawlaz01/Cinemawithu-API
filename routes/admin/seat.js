@@ -6,6 +6,7 @@ const { verifyToken, authorize } = require('../../config/middleware/jwt');
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 });
 
+// Mengambil semua data kursi dari database dengan caching
 router.get('/seat', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = 'allSeats';
   const cachedSeats = cache.get(cacheKey);
@@ -30,6 +31,7 @@ router.get('/seat', verifyToken, authorize(['admin']), async (req, res) => {
   }
 });
 
+// Mengambil data kursi berdasarkan ID dengan caching
 router.get('/seat/:id', verifyToken, authorize(['admin']), async (req, res) => {
   const cacheKey = `seat-${req.params.id}`;
   const cachedSeat = cache.get(cacheKey);
@@ -60,6 +62,7 @@ router.get('/seat/:id', verifyToken, authorize(['admin']), async (req, res) => {
   }
 });
 
+// Membuat data kursi baru dengan validasi format label
 router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     if (!req.body.theater_id || !req.body.seat_label) {
@@ -112,6 +115,7 @@ router.post('/seat/create', verifyToken, authorize(['admin']), async (req, res) 
   }
 });
 
+// Mengupdate data kursi berdasarkan ID dengan validasi format label
 router.patch('/seat/update/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const seatId = req.params.id;
@@ -172,6 +176,7 @@ router.patch('/seat/update/:id', verifyToken, authorize(['admin']), async (req, 
   }
 });
 
+// Menghapus data kursi berdasarkan ID
 router.delete('/seat/delete/:id', verifyToken, authorize(['admin']), async (req, res) => {
   try {
     const seatId = req.params.id;

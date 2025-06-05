@@ -5,6 +5,7 @@ const { verifyToken, authorize } = require('../../config/middleware/jwt');
 const bookingModel = require('../../model/bookingModel');
 const UserModel = require('../../model/userModel');
 
+// Membuat transaksi pembayaran menggunakan Midtrans
 router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["user"]), async (req, res) => {
   try {
     const { filmId, showtimeId, bookingId } = req.params;
@@ -79,6 +80,7 @@ router.post("/payment/:filmId/:showtimeId/:bookingId", verifyToken, authorize(["
   }
 });
 
+// Mengecek status pembayaran dari Midtrans
 router.get("/payment/status/:gatewayTxnId", verifyToken, authorize(["user"]), async (req, res) => {
   const snap = new midtransClient.Snap({
     isProduction: false,

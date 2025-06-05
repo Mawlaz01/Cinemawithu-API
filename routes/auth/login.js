@@ -9,6 +9,7 @@ const limiter = require('../../config/middleware/rateLimiter')
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 });
 
+// Login untuk user dan admin dengan rate limiting dan validasi
 router.post('/login', limiter, async (req, res, next) => {
     let { email, password } = req.body
 
@@ -56,6 +57,7 @@ router.post('/login', limiter, async (req, res, next) => {
     }
 })
 
+// Mengambil profil user/admin yang sedang login dengan caching
 router.get('/profile', verifyToken, async (req, res) => {
     const cacheKey = `profile-${req.user.id}`;
     const cachedProfile = cache.get(cacheKey);

@@ -5,6 +5,7 @@ const userModel = require('../../model/userModel')
 const bookingModel = require('../../model/bookingModel')
 const { verifyToken, authorize } = require('../../config/middleware/jwt')
 
+// Mengambil daftar film yang sedang tayang
 router.get('/dashboard/showing', verifyToken, authorize(['user']), async (req, res) => {
   try {
     const films = await filmModel.getNowShowing()
@@ -20,6 +21,7 @@ router.get('/dashboard/showing', verifyToken, authorize(['user']), async (req, r
   }
 })
 
+// Mengambil daftar film yang akan datang
 router.get('/dashboard/upcoming', verifyToken, authorize(['user']), async (req, res) => {
   try {
     const films = await filmModel.getUpcoming()
@@ -35,6 +37,7 @@ router.get('/dashboard/upcoming', verifyToken, authorize(['user']), async (req, 
   }
 })
 
+// Mengambil profil user yang sedang login
 router.get('/dashboard/profile', verifyToken, authorize(['user']), async (req, res) => {
     try {
         const userId = req.user.id
@@ -59,6 +62,7 @@ router.get('/dashboard/profile', verifyToken, authorize(['user']), async (req, r
     }
 })
 
+// Mengambil history booking user
 router.get('/dashboard/history', verifyToken, authorize(['user']), async (req, res) => {
     try {
         const userId = req.user.id
@@ -76,6 +80,7 @@ router.get('/dashboard/history', verifyToken, authorize(['user']), async (req, r
     }
 })
 
+// Mengambil detail history booking berdasarkan ID
 router.get('/dashboard/history/:bookingId', verifyToken, authorize(['user']), async (req, res) => {
     try {
         const bookingId = req.params.bookingId;
